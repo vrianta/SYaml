@@ -1,0 +1,10 @@
+multiline:
+  literal: |
+    This text
+    preserves
+    line breaks.
+
+  folded: >
+    This text
+    becomes a
+    single line.
