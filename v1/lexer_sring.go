@@ -111,6 +111,7 @@ func (l *lexer) lexQuotedString() {
 
 	// Emit what we have. You may later replace this with an error.
 	l.emit(TokenString, l.data[valueStart:l.pos])
+	l.updateLineEnding()
 }
 
 func (l *lexer) lexPlainString() {
@@ -129,7 +130,7 @@ func (l *lexer) lexPlainString() {
 		}
 
 		switch l.peek() {
-		case _Space, _Tab, _Colon:
+		case _Space, _Tab:
 			goto done
 		}
 
@@ -140,4 +141,57 @@ done:
 	if start != l.pos {
 		l.emit(TokenString, l.data[start:l.pos])
 	}
+	l.updateLineEnding()
+}
+
+func (l *lexer) lexMultiLineString() bool {
+
+	// Find the opening delimiter.
+	for _, d := range l.Settings.MultiLineStringDelimiter {
+		if !l.match(d.Start) {
+			break
+		}
+
+		start := d.Start
+
+		// Skip opening delimiter.
+		l.pos += len(start)
+		l.col += len(start)
+
+		valueStart := l.pos
+
+		for !l.eof() {
+			// Handle escaped characters.
+			if l.peek() == '\\' {
+				l.advance()
+
+				if !l.eof() {
+					l.advance()
+				}
+
+				continue
+			}
+
+			if l.matchWhitespace() {
+				continue
+			}
+
+			// Closing delimiter.
+			if l.match(d.End) {
+				l.emit(TokenString, l.data[valueStart:l.pos])
+
+				l.pos += len(d.End)
+				l.col += len(d.End)
+
+				return true
+			}
+
+			l.advance()
+		}
+
+		// Emit what we have. You may later replace this with an error.
+		l.emit(TokenString, l.data[valueStart:l.pos])
+	}
+
+	return false
 }

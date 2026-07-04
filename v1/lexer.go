@@ -2,10 +2,13 @@ package syml
 
 func Lexer(data []byte, settings Settings) []Token {
 	l := lexer{
-		data:     data,
-		line:     1,
-		col:      1,
-		Settings: settings,
+		data:        data,
+		data_len:    len(data),
+		line:        1,
+		col:         1,
+		lineStart:   true,
+		indentStack: []int{0},
+		Settings:    settings,
 	}
 
 	return l.lex()
@@ -13,10 +16,19 @@ func Lexer(data []byte, settings Settings) []Token {
 
 type lexer struct {
 	data     []byte
+	data_len int
 	pos      int
 	line     int
 	col      int
-	tokens   []Token
+
+	expectValue bool
+	ending      []byte
+
+	tokens []Token
+
+	indentStack []int
+	lineStart   bool
+
 	Settings Settings
 }
 
@@ -26,6 +38,8 @@ type Delimiter struct {
 }
 
 type Settings struct {
+	AssignmentIndicators [][]byte
+
 	// ----------------------------
 	// Comments
 	// ----------------------------
@@ -59,21 +73,20 @@ type Settings struct {
 	// Examples: {`"""`}, {`'''`}
 	MultiLineStringDelimiter []Delimiter
 
+	Indentations []Delimiter
+
+	PermanentValues [][]byte
+	PermanentTypes  [][]byte
+
 	// ----------------------------
 	// End of input
 	// ----------------------------
 
 	EOF []byte
-
-	// ----------------------------
-	// Indentation
-	// ----------------------------
-
-	TabsAsIndent bool
-	IndentWidth  int
 }
 
 func (l *lexer) lex() []Token {
+
 	for !l.eof() {
 
 		switch {
@@ -90,34 +103,54 @@ func (l *lexer) lex() []Token {
 			return l.tokens
 
 		case l.matchLineEnding():
+			l.updateLineEnding()
 			continue
 
 		case l.matchWhitespace():
 			continue
 
-		case l.Settings.TabsAsIndent && l.peek() == _Tab:
-			l.emit(TokenIndent, []byte{_Tab})
-			l.advance()
+		case l.isAssignmentIndicator():
+			continue
+		}
 
-		case l.peek() == _Colon:
-			l.emit(TokenColon, []byte{_Colon})
-			l.advance()
+		if l.expectValue {
 
-		case l.peek() == _Dash:
-			l.emit(TokenDash, []byte{_Dash})
-			l.advance()
+			switch {
 
-		case isDigit(l.peek()):
-			l.lexNumber()
+			case l.matchPermanentValue():
+				continue
 
-		case l.matchStringDelimiter():
-			l.lexQuotedString()
+			case isDigit(l.peek()):
+				l.lexNumber()
+				continue
+
+			case l.lexMultiLineString():
+				continue
+
+			case l.lexIndentation():
+				continue
+
+			case l.matchStringDelimiter():
+				l.lexQuotedString()
+				continue
+
+			default:
+				l.expectValue = false
+				l.lexPlainString()
+				continue
+			}
+
+		}
+
+		switch {
 
 		case isLetter(l.peek()):
 			l.lexIdentifier()
+			continue
 
 		default:
 			l.lexPlainString()
+			continue
 		}
 	}
 

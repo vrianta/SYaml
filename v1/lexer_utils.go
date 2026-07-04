@@ -29,17 +29,29 @@ func (l *lexer) matchLineEnding() bool {
 		}
 
 		if match {
-			l.emit(TokenNewLine, ending)
-
-			l.pos += len(ending)
-			l.line++
-			l.col = 1
-
+			l.ending = ending
+			l.expectValue = false
+			l.lineStart = true
 			return true
 		}
 	}
 
 	return false
+}
+
+func (l *lexer) updateLineEnding() {
+	ending_len := len(l.ending)
+	if ending_len == 0 {
+		return
+	}
+	l.emit(TokenNewLine, l.ending)
+
+	l.pos += ending_len
+	l.line++
+	l.col = 1
+	l.ending = []byte("")
+
+	l.lineStart = true
 }
 
 func (l *lexer) matchEOF() bool {
@@ -74,6 +86,7 @@ func (l *lexer) matchSingleLineComment() bool {
 	for !l.eof() {
 
 		if l.matchLineEnding() {
+			l.updateLineEnding()
 			return true
 		}
 
@@ -113,6 +126,7 @@ func (l *lexer) matchMultiLineComment() bool {
 			l.advance()
 		}
 
+		l.updateLineEnding()
 		// EOF before finding the closing delimiter.
 		return true
 	}

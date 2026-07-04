@@ -1,6 +1,27 @@
 package main
 
-import syml "github.com/vrianta/SYml/v1"
+import (
+	"os"
+
+	syml "github.com/vrianta/SYml/v1"
+)
+
+var testSYaml = `
+name: Joy 
+city: Kolkata
+age: 30
+testObj:
+	test1: 1
+	test2: 2
+
+st1: "our test to test lexer" #command
+`
+
+var testObj = `
+testObj:
+	test1: 1
+	test2: 2
+`
 
 type test struct {
 	name string
@@ -8,14 +29,11 @@ type test struct {
 }
 
 func main() {
+
+	data, err := os.ReadFile("stringtest.yml")
+	if err != nil {
+		panic(err)
+	}
 	t := test{}
-	syml.Unmarshal(
-		[]byte(`
-    name: Joy 
-    city: Kolkata
-	testObj:
-		test1: 1
-		test2: 2
-	st1: "our test to test lexer" #command
-`), &t)
+	syml.Unmarshal(data, &t)
 }

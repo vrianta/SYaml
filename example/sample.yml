@@ -1,0 +1,97 @@
+# Application configuration
+
+app:
+  name string: "My Application"
+  version string: 1.0.0
+  debug: true
+
+server:
+  host: localhost
+  port: 8080
+  ssl: false
+  timeout: 30s
+
+database:
+  driver: postgres
+  host: db.example.com
+  port: 5432
+  username: admin
+  password: secret
+  database: mydb
+  max_connections: 20
+
+cache:
+  enabled: true
+  ttl: 5m
+
+logging:
+  level: info
+  file: logs/app.log
+  format: json
+
+features:
+  - authentication
+  - api
+  - metrics
+  - websocket
+
+users:
+  - id: 1
+    name: Alice
+    admin: true
+    email: alice@example.com
+
+  - id: 2
+    name: Bob
+    admin: false
+    email: bob@example.com
+
+paths:
+  home: /home/app
+  temp: /tmp
+  uploads: /var/uploads
+
+limits:
+  memory: 512MB
+  cpu: 2
+  disk: 20GB
+
+colors:
+  primary: "#0078D4"
+  secondary: "#FF6600"
+
+empty:
+  null_value: null
+  empty_string: ""
+  empty_list: []
+  empty_map: {}
+
+numbers:
+  integer: 42
+  negative: -15
+  float: 3.14159
+  scientific: 1.2e6
+
+booleans:
+  enabled: true
+  disabled: false
+
+multiline:
+  literal: |
+    This text
+    preserves
+    line breaks.
+
+  folded: >
+    This text
+    becomes a
+    single line.
+
+environment:
+  development:
+    debug: true
+    database: dev_db
+
+  production:
+    debug: false
+    database: prod_db

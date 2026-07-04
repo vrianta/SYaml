@@ -10,22 +10,28 @@ const (
 	TokenIdentifier
 	TokenNumber
 	TokenString
+	TokenPermanentValue
+	TokenPermanentType
 
-	TokenColon
+	TokenAssignment
 	TokenDash
 	TokenIndent
+	TokenDedent
 	TokenNewLine
 )
 
 var TokenTypeString = [...]string{
-	TokenEOF:        "EOF",
-	TokenIdentifier: "Identifier",
-	TokenNumber:     "Number",
-	TokenString:     "String",
-	TokenColon:      "Colon",
-	TokenDash:       "Dash",
-	TokenIndent:     "Indent",
-	TokenNewLine:    "NewLine",
+	TokenEOF:            "EOF",
+	TokenIdentifier:     "Identifier",
+	TokenNumber:         "Number",
+	TokenString:         "String",
+	TokenPermanentValue: "PermanentValue",
+	TokenPermanentType:  "PermanentType",
+	TokenAssignment:     "Assignment",
+	TokenDash:           "Dash",
+	TokenIndent:         "Indent",
+	TokenDedent:         "Dedent",
+	TokenNewLine:        "NewLine",
 }
 
 type Token struct {

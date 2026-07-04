@@ -7,7 +7,7 @@ package syml
  * to the length of the input buffer.
  */
 func (l *lexer) eof() bool {
-	return l.pos >= len(l.data)
+	return l.pos >= l.data_len
 }
 
 /*
